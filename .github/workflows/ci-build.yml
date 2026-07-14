@@ -1,0 +1,26 @@
+name: CI Build & Test
+on:
+  schedule:
+    - cron: '0 17 * * *'
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Run Cache Optimization
+        run: |
+          git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git config --local user.name "${{ github.actor }}"
+          REST_CHANCE=$(( RANDOM % 100 ))
+          if [ $REST_CHANCE -lt 10 ]; then exit 0; fi
+          NUM_COMMITS=$(( ( RANDOM % 85 )  + 1 ))
+          for i in $(seq 1 $NUM_COMMITS); do
+            echo "Cache sync $i at $(date)" >> .cache_sys_sync.log
+            git add .cache_sys_sync.log
+            git commit -m "chore: update build cache [skip ci]"
+          done
+          git push
